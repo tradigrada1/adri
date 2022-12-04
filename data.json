@@ -1,0 +1,17 @@
+{
+    "firs_msg":"Olá,”username”, como posso ajudar? 😊",
+    "sec_user":"👇🏼“Por favor, escolha umas das opções:👇🏼\n\n\n*A* - 📣 Publicar Nota/Pauta?\n*B* - 📝 Fazer Cadastro\n*C* - ⭐ Assinar Plano?\n*D* - ⚙️ Suporte ( ```Help``` )\n\n\nEscolha a *Letra* para prosseguir”",
+    "registration":"🧐 Você possui Cadastro no Portal? 🤔 \n\n\n*A* - Sim (Yes)\n*B* - Não (No)\n\n\nEscolha a *Letra* para prosseguir”",
+    "need_act_1":"😥 Desculpe, mas é necessário um cadastro ativo. 📝",
+    "need_act_2":"Para dar continuidade, é necessário fazer o cadastro! 📝",
+    "need_act_3":"Leva menos de 2 minutos para preencher o cadastro! 😮⏱️",
+    "need_act_4":"Acesse o link 🔗(LINK - to be defined)🔗e efetue o cadastro, volte aqui e comece o procedimento novamente 😉 👍🏻",
+    "user_act":"👍🏻 Tudo certo, (username), cadastro confirmado! vamos dar continuidade…",
+    "req_title":"Por favor, me envie o Título primeiro 🧾",
+    "send_text_image":"Por favor, me envie o imagem com texto",
+    "send_text":"Por favor, me envie o texto",
+    "send_image":"Por favor, me envie o imagem",
+    "post_suc":"✅ A postagem foi criada com sucesso"
+}
+
+

@@ -1,0 +1,404 @@
+var express = require('express');
+var router = express.Router();
+const { getDb, connectToDb } = require('../db')
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const qrcode = require("qrcode-terminal");
+const QRCode = require('qrcode')
+var axios = require('axios');
+var FormData = require('form-data');
+// db connection
+let db
+
+connectToDb((err) => {
+  if(!err){
+    console.log('app listening on port 3000')
+    db = getDb()
+  }
+})
+
+// Create custom homepage
+// --------------------------------------------------
+router.get('/', function(req, res, next) {
+  const users = req.app.locals.users;
+
+  users.find().limit(3).toArray((err, recent) => {
+    res.render('index', { recent } );
+  });
+});
+// --------------------------------------------------
+
+// --------------------------------------------------
+router.get('/dbqr', function(req, res, next) {
+    // if (!req.isAuthenticated()) { 
+    //   res.redirect('/auth/login');
+    // }
+    /////////////////////////
+    const db = req.app.locals.db;
+
+    db.collection("qr").findOne({"id_qr":"qr"}, (err, results) => {
+        if (err || !results) {
+            console.log('errr');
+          //res.render('public-profile', { messages: { error: ['User not found'] } });
+        }
+        var qrc = results["src"];
+        //console.log(tr);
+        //res.render('qrindex', { qrc });
+        
+        var status_x = results["status"];
+        if (status_x){
+            qrc = false;
+            res.render('qrindex', { qrc });
+        }else{
+            res.render('qrindex', { qrc });
+        };
+
+
+
+
+      });
+    
+    ////////////////////////
+    
+  });
+
+
+////////////////////////////
+////////////////////////////
+
+router.get('/table', function(req, res, next) {
+    if (!req.isAuthenticated()) {
+      res.redirect('/auth/login');
+    }
+    const users = req.app.locals.users_cost;
+  
+    users.find().toArray((err, recent) => {
+      console.log('app listening on port 3000')
+      //console.log(recent)
+      res.render('cost', { recent } );
+    });
+  });
+  
+  router.get('/dashboard', function(req, res, next) {
+    if (!req.isAuthenticated()) {
+      res.redirect('/auth/login');
+    }
+    const users = req.app.locals.users_cost;
+  
+    users.find().toArray((err, recent) => {
+      console.log('app listening on port 3000')
+      //console.log(recent)
+      res.render('dashboard', { recent } );
+    });
+  });
+  router.get('/all_users', function(req, res, next) {
+    const users = req.app.locals.users_cost;
+  
+    users.find().toArray((err, recent) => {
+      //console.log(recent)
+      res.status(200).json(recent)
+    });
+  });
+
+////////////////////////////
+////////////////////////////
+// Use the saved values
+const client = new Client({
+    authStrategy: new LocalAuth({ clientId: "client-one" })
+});
+
+
+function makeid(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
+
+
+
+router.get('/scan/:key', function(req, res) {
+    const db = req.app.locals.db;
+
+    if (req.params.key){
+    var tokm = req.params.key;
+    
+    if (tokm!="OVJfebpht7HOzd1TZR") {
+        res.status(500).json({error: 'Could not fetch the documents'})
+        //return;
+      }
+    client.on('qr', (qr) => {
+        // Generate and scan this code with your phone
+        //qrcode.generate(qr, { small: true });
+        console.log('qr...')
+
+        QRCode.toDataURL(qr).then(url => {
+            console.log('urlqr...')
+            var qrc = url;
+            //res.render('qrindexv', { qrc });
+        //     res.send(`
+        //     <h2>QRCode Generated</h2>
+        //     <div><img src='${url}'/></div>
+        //   `)
+
+
+
+
+         if (url) {
+            var src = url;
+            //res.json(src);
+            async function run() {
+        
+                try {
+              
+              
+                  const qrm = db.collection("qr");
+              
+            // create a filter for a movie to update
+        
+            const filter = { "id_qr": "qr" };
+        
+            // this option instructs the method to create a document if no documents match the filter
+        
+            const options = { upsert: true };
+        
+            // create a document that sets the plot of the movie
+        
+            const updateDoc = {
+        
+              $set: {
+        
+                "src": src,
+                "status": false
+        
+              },
+        
+            };
+        
+            const result = await qrm.updateOne(filter, updateDoc, options);
+              
+                  console.log(`Modified document(s)`);
+                  //res.json({"src":src});
+              
+                } finally {
+              
+              
+                }
+              
+              }
+              
+              run().catch(console.dir);
+        }
+        else {
+            console.log('No query string');
+        }
+
+
+
+
+
+
+
+        }).catch(err => {
+            console.debug(err)
+        })
+          
+            
+
+
+        //<img src={response.Url} />
+        //qrcode.toDataURL(qr).then(url => {res.send(`<h2>QRCode Generated</h2><div><img src='${url}'/></div>`))}
+        console.log(qr);
+        console.log('QR RECEIVED');
+
+
+        
+    });
+
+
+
+
+
+
+
+
+
+
+    client.on('ready', () => {
+        console.log('Client is ready!');
+        var src = false
+        async function run() {
+        
+            try {
+          
+          
+              const qrm = db.collection("qr");
+          
+        // create a filter for a movie to update
+    
+        const filterx = { "id_qr": "qr" };
+    
+        // this option instructs the method to create a document if no documents match the filter
+    
+        const options = { upsert: true };
+    
+        // create a document that sets the plot of the movie
+    
+        const updateDoc = {
+    
+          $set: {
+    
+            "src": src,
+            "status": true
+    
+          },
+    
+        };
+    
+        const resultx = await qrm.updateOne(filterx, updateDoc, options);
+          
+              console.log(`qr saved`);
+              //res.json({"src":src});
+          
+            } finally {
+          
+          
+            }
+          
+          }
+          
+          run().catch(console.dir);
+    });
+
+
+    client.on('message',async msg => {
+        var srcfromchat = "";
+        if(msg.hasMedia) {
+            const media = await msg.downloadMedia();
+            var mimetype_ = media.mimetype;
+            var data_ = media.data;
+            srcfromchat = `data:${mimetype_};base64,${data_}`
+            console.log(srcfromchat);
+            //data:image/jpeg;base64,
+            msg.body = srcfromchat;
+            //delet }else{
+            
+        //}else{
+        var data = new FormData();
+        data.append('token', 's45sd12');
+        data.append('phone', msg.from);
+        data.append('msg', msg.body);
+        
+        var config = {
+          method: 'post',
+          url: 'https://meowing-lovely-club.glitch.me/api_w',
+          headers: { 
+            ...data.getHeaders()
+          },
+          data : data
+        };
+        console.log(data);
+        axios(config)
+        .then(function (response) {
+            var rest_ = response.data["output"];
+            console.log(response.data["output"]);
+            
+            //console.log(response);
+            for (const element of rest_) {
+                // ...send `message`...
+                msg.reply(element);
+            }
+            
+          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+        //if (msg.body == '!ping') {
+        //    msg.reply('pong');
+        //    console.log('QR RECEIVED',JSON.stringify(msg.body));
+        //}
+    }//else
+    });
+    
+
+
+
+
+    // client.on('message', async msg => {
+    //     if(msg.hasMedia) {
+    //         const media = await msg.downloadMedia();
+    //         // do something with the media data here
+    //         console.log("media");
+    //         console.log(typeof media);
+    //         console.log(media);
+    //     }
+    // });
+
+
+
+
+
+
+    
+    client.on('change_state', state => {
+        console.log('CHANGE STATE', state );
+    });
+    
+    client.on('disconnected', (reason) => {
+        console.log('Client was logged out', reason);
+    });
+    
+    
+    client.initialize();
+
+
+
+}
+
+
+})
+///////////////////////////
+///////////////////////////
+
+
+router.get('/smr', function(req, res) {
+    var qrc = "2@olQidwulbEZRbmtKkUKoTohXDI8JhNYGKfheBKIb8Z+oJBJzFcFCyyPW/A6iVSEJz51kmkCEx+w9kQ==,VbT1eeQ79vjVTrqA6fbdulyNi1RzDC9WO/3L64gAKCg=,02CkneknHeYUZHL+xJImY9bdUx89DZ1SH4Zn9+gYOAM=,WdBjQBaq6ZFXyqUL1a7+YtgkueZM1DXBB5KwmxL5KEE=";
+    res.render('qrindexv', { qrc });
+})
+
+
+router.get('/ts22', function(req, res) {
+
+    req.app.locals.dbc.collection("users_table"), (err, results) => {
+        if (err || !results) {
+            console.log('errr');
+          //res.render('public-profile', { messages: { error: ['User not found'] } });
+        }
+        console.log(results);
+        
+    }
+})
+
+
+
+router.get('/ts2', function(req, res, next) {
+    const db = req.app.locals.db;
+  
+     db.collection("users_table").find().toArray((err, recent) => {
+        console.log(recent);
+       res.render('index', { recent } );
+     });
+   });
+
+//
+router.get('/success', function(req, res, next) {
+    
+      res.render('success');
+    
+  });
+// --------------------------------------------------
+module.exports = router;
